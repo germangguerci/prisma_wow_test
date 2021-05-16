@@ -1,0 +1,250 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model adm_contenidos {
+  id              Int                         @id @default(autoincrement())
+  alias           String                      @db.VarChar(50)
+  nombre          String?                     @db.VarChar(255)
+  controlador     String                      @db.VarChar(50)
+  metadata        String                      @db.Text
+  parent_id       Int                         @default(0)
+  parametros      Int                         @default(0)
+  en_menu         Boolean                     @default(false)
+  orden           Int                         @default(999)
+  es_default      Boolean                     @default(false)
+  esta_protegido  Boolean                     @default(false)
+  perfiles        String?
+  estado          adm_contenidos_estado       @default(HAB)
+  sys_fecha_modif DateTime?                   @db.DateTime(0)
+  descripcion     String?                     @db.VarChar(255)
+  operaciones     adm_contenidos_operaciones?
+  permit          Boolean?
+  sys_fecha_alta  DateTime                    @default(now()) @db.DateTime(0)
+  sys_usuario_id  Int
+
+  @@index([alias], name: "alias")
+}
+
+model adm_mensajes {
+  id        Int       @id @default(autoincrement())
+  fechahora DateTime? @db.DateTime(0)
+  from_id   Int?
+  to_id     Int?
+  texto     String?   @db.Text
+  estado    Int?
+  chain     Int?
+  asunto    String?   @db.VarChar(64)
+
+  @@index([from_id], name: "from_id")
+  @@index([to_id], name: "to_id")
+}
+
+model adm_mensajes_leidos {
+  id         Int       @id @default(autoincrement())
+  mensaje_id Int?
+  fechahora  DateTime? @db.DateTime(0)
+  usuario_id Int?
+
+  @@index([mensaje_id], name: "mensaje_id")
+}
+
+model adm_recovery {
+  id         Int                  @id @default(autoincrement())
+  usuario_id Int
+  email      String               @db.VarChar(255)
+  code       String               @db.VarChar(32)
+  fecha      DateTime?            @db.DateTime(0)
+  estado     adm_recovery_estado? @default(HAB)
+}
+
+model adm_sesiones {
+  id         Int       @id @default(autoincrement())
+  usuario_id Int
+  fecha_hora DateTime? @db.DateTime(0)
+  estado     Int       @default(0)
+  navegador  String    @db.VarChar(255)
+  idle       Int
+  ip         String    @db.VarChar(32)
+
+  @@index([fecha_hora], name: "fecha_hora")
+  @@index([usuario_id], name: "usuario_id")
+}
+
+model adm_usuarios {
+  id              Int                 @id @default(autoincrement())
+  nombre          String?             @db.VarChar(50)
+  apellido        String?             @db.VarChar(50)
+  username        String              @db.VarChar(50)
+  persona_id      Int
+  iniciales       String?             @db.VarChar(5)
+  password        String              @db.VarChar(32)
+  email           String?             @db.VarChar(75)
+  nivel           adm_usuarios_nivel  @default(USR)
+  opciones        String?             @db.Text
+  estado          adm_usuarios_estado @default(HAB)
+  tel             String?             @db.VarChar(25)
+  sys_fecha_alta  DateTime?           @db.DateTime(0)
+  sys_fecha_modif DateTime?           @db.DateTime(0)
+  sys_usuario_id  Int?
+}
+
+model config_sitio {
+  id     Int    @id @default(autoincrement())
+  nombre String @db.Text
+  data   String @db.LongText
+}
+
+model sys_logging {
+  id             Int                      @id @default(autoincrement())
+  sys_fechahora  DateTime?                @db.DateTime(0)
+  tipo_evento    sys_logging_tipo_evento? @default(ALL)
+  descripcion    String?                  @db.Text
+  data           String?                  @db.Text
+  sys_usuario_id Int?
+
+  @@index([tipo_evento], name: "event_type")
+  @@index([sys_fechahora], name: "sys_fechahora")
+}
+
+model wow_areas {
+  id              Int              @id @default(autoincrement())
+  nombre          String           @db.Text
+  descripcion     String?          @db.LongText
+  estado          wow_areas_estado @default(HAB)
+  sys_fecha_alta  DateTime         @default(now()) @db.DateTime(0)
+  sys_fecha_modif DateTime         @default(now()) @db.DateTime(0)
+  sys_usuario_id  Int
+}
+
+model wow_cont_horas {
+  id               Int                   @id @default(autoincrement())
+  usuario_id       Int?
+  area_id          Int
+  tarea_id         Int                   @default(0)
+  subtarea         String?               @db.Text
+  proyecto_id      Int                   @db.TinyInt
+  cant_horas       Int                   @default(1)
+  fechahora        DateTime?             @db.DateTime(0)
+  es_extra         Boolean
+  es_dia_laborable Boolean
+  motivo           String?               @db.Text
+  estado           wow_cont_horas_estado @default(HAB)
+  sys_fecha_alta   DateTime?             @db.DateTime(0)
+  sys_fecha_modif  DateTime?             @db.DateTime(0)
+  sys_usuario_id   Int
+
+  @@index([fechahora], name: "fechahora")
+}
+
+model wow_proyectos {
+  id              Int                   @id @default(autoincrement())
+  nombre          String?               @db.VarChar(255)
+  estado          wow_proyectos_estado? @default(HAB)
+  data            String?               @db.Text
+  sys_fecha_alta  DateTime?             @db.DateTime(0)
+  sys_fecha_modif DateTime?             @db.DateTime(0)
+  sys_usuario_id  Int?
+}
+
+model wow_sub_tareas {
+  id              Int                    @id @default(autoincrement())
+  tipo_id         Int
+  nombre          String?                @db.VarChar(255)
+  estado          wow_sub_tareas_estado? @default(HAB)
+  data            String?                @db.Text
+  sys_fecha_alta  DateTime?              @db.DateTime(0)
+  sys_fecha_modif DateTime?              @db.DateTime(0)
+  sys_usuario_id  Int?
+
+  @@index([tipo_id], name: "grupo_id")
+}
+
+model wow_tareas {
+  id              Int                @id @default(autoincrement())
+  nombre          String?            @db.VarChar(255)
+  descripcion     String             @db.Text
+  estado          wow_tareas_estado? @default(HAB)
+  sys_fecha_alta  DateTime?          @db.DateTime(0)
+  sys_fecha_modif DateTime?          @db.DateTime(0)
+  sys_usuario_id  Int?
+}
+
+enum adm_contenidos_estado {
+  HAB
+  DES
+  ELI
+}
+
+enum adm_contenidos_operaciones {
+  A
+  B
+  M
+  C
+}
+
+enum adm_recovery_estado {
+  HAB
+  DES
+  ELI
+}
+
+enum adm_usuarios_nivel {
+  USR
+  ADM
+  OWN
+}
+
+enum adm_usuarios_estado {
+  HAB
+  DES
+  ELI
+}
+
+enum sys_logging_tipo_evento {
+  ALL
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  FATAL
+  OFF
+  TRACE
+}
+
+enum wow_areas_estado {
+  HAB
+  DES
+  ELI
+  EMPTY_ENUM_VALUE @map("")
+}
+
+enum wow_cont_horas_estado {
+  HAB
+  DES
+  ELI
+  EMPTY_ENUM_VALUE @map("")
+}
+
+enum wow_proyectos_estado {
+  HAB
+  DES
+  ELI
+}
+
+enum wow_sub_tareas_estado {
+  HAB
+  DES
+  ELI
+}
+
+enum wow_tareas_estado {
+  HAB
+  DES
+  ELI
+}
