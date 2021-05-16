@@ -1,3 +1,4 @@
+const Boom = require('@hapi/boom')
 const usersPlugin = {
   name: 'app/users',
   dependencies: ['prisma'],
@@ -9,6 +10,21 @@ const usersPlugin = {
             path: '/users',
             handler: createUserHandler,
         },
+          {
+            method: 'DELETE',
+            path: '/users',
+            handler: deleteUserHandler,
+        },
+        {
+            method: 'PUT',
+            path: '/users',
+            handler: updateUserHandler
+        },
+        {
+            method: 'GET',
+            path: '/users',
+            handler: readUsersHandler
+        }
     ])
   },
 }
@@ -20,11 +36,14 @@ async function createUserHandler(request, h) {
   try {
     const createdUser = await prisma.adm_usuarios.create({
       data: {
-        nombre: "ramon",
-        apellido: "lopez",
-        username: "xxramonpruebaxx",
-        password: "Calamuchita2021!",
-        persona_id: 0
+        nombre: payload.nombre,
+        apellido: payload.apellido,
+        username: payload.username,
+        persona_id: payload.persona_id,
+        iniciales: payload.iniciales,
+        password: payload.password,
+        email: payload.email,
+        tel: payload.tel, 
       },
       select: {
         id: true,
@@ -35,26 +54,57 @@ async function createUserHandler(request, h) {
     console.log(err)
   }
 }
-/* async function createUserHandler(request, h) {
+
+async function deleteUserHandler(request, h) {
   const { prisma } = request.server.app
   const payload = request.payload
 
   try {
-    const createdUser = await prisma.user.create({
-      data: {
-        firstName: payload.firstName,
-        lastName: payload.lastName,
-        email: payload.email,
-        social: JSON.stringify(payload.social),
-      },
-      select: {
-        id: true,
+    const deletedUser = await prisma.adm_usuarios.delete({
+      where: {
+          id: payload.id
       },
     })
-    return h.response(createdUser).code(201)
+    return h.response("Usuario eliminado", deletedUser).code(201)
   } catch (err) {
     console.log(err)
   }
-} */
+}
+
+async function updateUserHandler(request, h) {
+  const { prisma } = request.server.app
+  const payload = request.payload
+  try {
+    const updatedUser = await prisma.adm_usuarios.update({
+      where: {
+          id: payload.id
+      },
+      data: {
+          nombre: "ramona",
+          apellido: payload.apellido,
+          persona_id: payload.persona_id
+      }
+    })
+    return h.response("Usuario actualizado", updatedUser).code(201)
+  } catch (err) {
+    return Boom.badRequest('invalid query');
+  }
+}
+
+async function readUsersHandler(request, h) {
+  const { prisma } = request.server.app
+  const payload = request.payload
+  console.log(payload);
+  
+  try {
+    const readUser = await prisma.adm_usuarios.findMany()
+    return h.response(readUser).code(201)
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+
+
 
 module.exports = usersPlugin; 
