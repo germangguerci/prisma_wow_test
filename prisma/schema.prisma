@@ -89,7 +89,7 @@ model adm_usuarios {
   opciones        String?             @db.Text
   estado          adm_usuarios_estado @default(HAB)
   tel             String?             @db.VarChar(25)
-  sys_fecha_alta  DateTime?           @db.DateTime(0)
+  sys_fecha_alta  DateTime?           @default(now()) @db.DateTime(0)
   sys_fecha_modif DateTime?           @db.DateTime(0)
   sys_usuario_id  Int?
 }
